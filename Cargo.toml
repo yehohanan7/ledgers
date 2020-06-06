@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    ".",
+    "penman",
+]
+
+[package]
+name = "ledger"
+version = "0.1.1"
+authors = ["John <yehohanan7@gmail.com>"]
+edition = "2018"
+description = "ledgers"
+license = "MIT"
+
+[lib]
+name = "service"
+path = "src/service.rs"
+
+[dev-dependencies]
+penman = { version = "0.1.0", path = "./penman"}
+
+
+[dependencies]
+api = { version = "0.1.0", path = "./api", package = "ledgers-api"}
+uuid = { version = "0.8", features = ["v4"] }
+crc = "1.8.1"
+byteorder = "1.3.4"
+tokio = { version = "0.2", features = ["full"] }
+futures = "0.3.5"
+prost = "0.6"
+tonic = "0.2.1"

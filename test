@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+echo "starting etcd..."
+docker stop etcd && docker rm etcd
+docker run -d -p 2379:2379  -p 2380:2380  --name etcd  gcr.io/etcd-development/etcd:v3.4.9  /usr/local/bin/etcd 
+while ! nc -z localhost 2379; do   
+  echo "waiting for etcd..."
+  sleep 0.1 
+done
+
+RUSTFLAGS="$RUSTFLAGS -A dead_code" cargo test
+
+echo "stopping etcd..."
+docker stop etcd && docker rm etcd
+

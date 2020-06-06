@@ -1,0 +1,14 @@
+[package]
+name = "penman"
+version = "0.1.1"
+authors = ["John <yehohanan7@gmail.com>"]
+edition = "2018"
+description = "a client for the ledgers server"
+license = "MIT"
+
+[dependencies]
+api = { version = "0.1.0", path = "../api", package = "ledgers-api"}
+tokio = { version = "0.2", features = ["full"] }
+futures = "0.3.5"
+prost = "0.6"
+tonic = "0.2.1"

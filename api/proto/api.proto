@@ -1,0 +1,13 @@
+syntax = "proto3";
+package api;
+
+service LedgerApi {
+    rpc Create (CreateLedgerRequest) returns (LedgerCreatedResponse);
+}
+
+message CreateLedgerRequest {
+}
+
+message LedgerCreatedResponse {
+    string ledger_id = 1;
+}
