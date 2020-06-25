@@ -14,7 +14,7 @@ use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting ledgers...");
+    println!("Starting ledgers..");
     let matches = App::new("Ledgers")
         .arg(Arg::with_name("etcd").long("etcd").takes_value(true))
         .arg(Arg::with_name("name").long("name").takes_value(true))
