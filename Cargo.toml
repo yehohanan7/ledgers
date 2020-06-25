@@ -30,3 +30,4 @@ tokio = { version = "0.2", features = ["full"] }
 prost = "0.6"
 etcd-rs = "0.2"
 tonic = "0.2.1"
+clap = "2.33.1"
