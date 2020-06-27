@@ -20,7 +20,7 @@ done
 
 case $cmd in
   "test" )
-     RUSTFLAGS="$RUSTFLAGS -A dead_code" cargo test
+     RUSTFLAGS="$RUSTFLAGS -A dead_code" cargo test --all
      echo "stopping etcd..."
      docker stop etcd && docker rm etcd
      ;;
