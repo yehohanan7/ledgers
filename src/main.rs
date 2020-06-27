@@ -3,7 +3,6 @@ mod handle;
 mod index;
 mod ledger;
 mod log;
-mod meta;
 mod segment;
 mod test_util;
 mod types;
@@ -16,20 +15,17 @@ use tonic::transport::Server;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting ledgers..");
     let matches = App::new("Ledgers")
-        .arg(Arg::with_name("etcd").long("etcd").takes_value(true))
-        .arg(Arg::with_name("name").long("name").takes_value(true))
         .arg(Arg::with_name("port").long("port").takes_value(true))
+        .arg(Arg::with_name("path").long("path").takes_value(true))
         .get_matches();
 
-    let etcd_address = matches.value_of("etcd").unwrap();
-    let etcd_address = etcd_address.split(",").map(|r| r.to_owned()).collect();
-    let port = matches.value_of("port").unwrap();
+    let port = matches.value_of("port").unwrap_or("5678");
+    let path = matches
+        .value_of("path")
+        .unwrap_or("./target/default_ledgers");
+    let path = PathBuf::from(path);
     let addr = format!("[::1]:{}", port);
-    let name = format!("ledgers.{}", matches.value_of("name").unwrap());
-    meta::register(&name, &addr, etcd_address).await;
-
-    let location = PathBuf::from("./target/default_ledgers");
-    let service = LedgerApiServer::new(service::new(location, 1000));
+    let service = LedgerApiServer::new(service::new(path, 1000));
     Server::builder()
         .add_service(service)
         .serve(addr.parse()?)
