@@ -1,4 +1,5 @@
 use api::ledger_api_server::LedgerApiServer;
+use etcd_rs::*;
 use futures::prelude::*;
 use std::net::TcpListener;
 use std::path::PathBuf;
@@ -19,7 +20,20 @@ pub async fn start_server() -> (Sender<()>, u16) {
             .unwrap();
     });
     tokio::time::delay_for(Duration::from_millis(100)).await;
+    let etcd_endpoint = vec!["http://localhost:2379".to_owned()];
+    let key = "ledgers.test_server";
+    let endpoint = format!("localhost:{}", port);
+    register(etcd_endpoint, key, &endpoint).await;
     (tx, port)
+}
+
+async fn register(endpoints: Vec<String>, key: &str, value: &str) {
+    let config = ClientConfig {
+        endpoints: endpoints,
+        auth: None,
+    };
+    let client = Client::connect(config).await.unwrap();
+    client.kv().put(PutRequest::new(key, value)).await.unwrap();
 }
 
 fn get_available_port() -> Option<u16> {
