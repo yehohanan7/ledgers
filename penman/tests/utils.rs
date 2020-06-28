@@ -7,7 +7,7 @@ use std::time::Duration;
 use tokio::sync::oneshot::{self, Sender};
 use tonic::transport::Server;
 
-pub async fn start_server() -> (Sender<()>, u16) {
+pub async fn start_server(etcd: String) -> (Sender<()>, u16) {
     let (tx, rx) = oneshot::channel::<()>();
     let port = get_available_port().unwrap();
     tokio::spawn(async move {
@@ -20,16 +20,15 @@ pub async fn start_server() -> (Sender<()>, u16) {
             .unwrap();
     });
     tokio::time::delay_for(Duration::from_millis(100)).await;
-    let etcd_endpoint = vec!["http://localhost:2379".to_owned()];
     let key = "ledgers.test_server";
     let endpoint = format!("localhost:{}", port);
-    register(etcd_endpoint, key, &endpoint).await;
+    register(etcd, key, &endpoint).await;
     (tx, port)
 }
 
-async fn register(endpoints: Vec<String>, key: &str, value: &str) {
+async fn register(endpoint: String, key: &str, value: &str) {
     let config = ClientConfig {
-        endpoints: endpoints,
+        endpoints: vec![endpoint],
         auth: None,
     };
     let client = Client::connect(config).await.unwrap();

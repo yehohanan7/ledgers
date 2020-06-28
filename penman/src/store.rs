@@ -24,11 +24,11 @@ impl Store {
             .unwrap();
     }
 
-    pub async fn get_ledger_servers(&self) -> Vec<String> {
+    pub async fn get_prefix(&self, prefix: &str) -> Vec<String> {
         let mut resp = self
             .client
             .kv()
-            .range(RangeRequest::new(KeyRange::prefix("ledgers.")))
+            .range(RangeRequest::new(KeyRange::prefix(prefix)))
             .await
             .unwrap();
 
@@ -49,7 +49,7 @@ mod tests {
         store.put("ledgers.one", "localhost:7777").await;
         store.put("ledgers.two", "localhost:8888").await;
 
-        let servers = store.get_ledger_servers().await;
+        let servers = store.get_prefix("ledgers.").await;
 
         assert_eq!(servers, vec!["localhost:7777", "localhost:8888"]);
     }

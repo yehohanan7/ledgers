@@ -2,12 +2,12 @@ mod utils;
 
 #[tokio::test]
 async fn create_new_ledger() {
-    let (tx, port) = utils::start_server().await;
-    let etcd = vec!["http://localhost:2379".to_owned()];
-    let penman = penman::new(etcd).await.unwrap();
+    let etcd = "http://localhost:2379".to_owned();
+    let (tx, port) = utils::start_server(etcd.clone()).await;
 
-    let ledger_id = penman.create_ledger(port).await.unwrap();
+    let penman = penman::new(vec![etcd]).await.unwrap();
+    let id = penman.create_ledger(port).await.unwrap();
 
-    assert_eq!(ledger_id.len(), 36);
+    assert_eq!(id.len(), 36);
     tx.send(()).unwrap();
 }
