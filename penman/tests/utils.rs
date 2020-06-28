@@ -7,7 +7,8 @@ use std::time::Duration;
 use tokio::sync::oneshot::{self, Sender};
 use tonic::transport::Server;
 
-pub async fn start_server(etcd: String) -> Sender<()> {
+pub async fn start_server() -> Sender<()> {
+    let etcd = String::from("http://localhost:2379");
     let (tx, rx) = oneshot::channel::<()>();
     let port = get_available_port().unwrap();
     tokio::spawn(async move {
