@@ -1,19 +1,26 @@
 mod store;
-use api::{ledger_api_client::LedgerApiClient, CreateLedgerRequest, LedgerCreatedResponse};
+use api::{ledger_api_client::LedgerApiClient, CreateLedgerRequest};
 use store::*;
+use tonic::transport::channel::Channel;
 
 pub struct Penman {
     store: Store,
+    ledgers: Vec<LedgerApiClient<Channel>>,
 }
 
 impl Penman {
     pub async fn new(etcd: Vec<String>) -> api::Result<Penman> {
+        let mut ledgers = vec![];
         let store = Store::new(etcd).await;
-        Ok(Penman { store })
+        for endpoint in store.get_prefix("ledgers.").await {
+            println!("url: {}", endpoint);
+            ledgers.push(LedgerApiClient::connect(endpoint).await?);
+        }
+        Ok(Penman { store, ledgers })
     }
 
-    pub async fn create_ledger(&self, port: u16) -> api::Result<String> {
-        let mut client = LedgerApiClient::connect(format!("http://[::1]:{}", port)).await?;
+    pub async fn create_ledger(&mut self) -> api::Result<String> {
+        let client = self.ledgers.get_mut(0).unwrap();
         let request = tonic::Request::new(CreateLedgerRequest {});
         let response = client.create(request).await?;
         Ok(response.into_inner().ledger_id)

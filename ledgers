@@ -22,6 +22,7 @@ case $cmd in
   "test" )
      RUSTFLAGS="$RUSTFLAGS -A dead_code" cargo test --all
      echo "stopping etcd..."
+     docker exec etcd etcdctl del ledgers --prefix
      docker stop etcd && docker rm etcd
      ;;
   * )

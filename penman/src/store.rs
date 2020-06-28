@@ -46,10 +46,10 @@ mod tests {
     #[tokio::test]
     async fn fetch_active_servers() {
         let store = Store::new(vec!["http://localhost:2379".to_owned()]).await;
-        store.put("ledgers.one", "localhost:7777").await;
-        store.put("ledgers.two", "localhost:8888").await;
+        store.put("testkey.1", "localhost:7777").await;
+        store.put("testkey.2", "localhost:8888").await;
 
-        let servers = store.get_prefix("ledgers.").await;
+        let servers = store.get_prefix("testkey.").await;
 
         assert_eq!(servers, vec!["localhost:7777", "localhost:8888"]);
     }
