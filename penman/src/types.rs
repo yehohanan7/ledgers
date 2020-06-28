@@ -4,6 +4,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     TranportError(tonic::transport::Error),
     RpcError(tonic::Code),
+    EtcdError(Box<dyn std::error::Error + Send + Sync + 'static>),
 }
 
 impl std::convert::From<tonic::transport::Error> for Error {

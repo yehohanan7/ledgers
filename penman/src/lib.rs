@@ -13,9 +13,8 @@ pub struct Penman {
 impl Penman {
     pub async fn new(etcd: Vec<String>) -> Result<Penman> {
         let mut clients = vec![];
-        let store = Store::new(etcd).await;
-        for endpoint in store.get_prefix("ledgers.").await {
-            println!("url: {}", endpoint);
+        let store = Store::new(etcd).await?;
+        for endpoint in store.get_prefix("ledgers.").await? {
             clients.push(LedgerApiClient::connect(endpoint).await?);
         }
         Ok(Penman { store, clients })

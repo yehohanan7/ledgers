@@ -1,3 +1,4 @@
+use crate::types;
 use etcd_rs::*;
 
 pub struct Store {
@@ -5,37 +6,34 @@ pub struct Store {
 }
 
 impl Store {
-    pub async fn new(endpoints: Vec<String>) -> Store {
+    pub async fn new(endpoints: Vec<String>) -> types::Result<Store> {
         let config = ClientConfig {
             endpoints: endpoints,
             auth: None,
         };
         let client = Client::connect(config).await.unwrap();
-        Store { client }
+        Ok(Store { client })
     }
 }
 
 impl Store {
-    pub async fn put(&self, key: &str, value: &str) {
-        self.client
-            .kv()
-            .put(PutRequest::new(key, value))
-            .await
-            .unwrap();
+    pub async fn put(&self, key: &str, value: &str) -> types::Result<()> {
+        let request = PutRequest::new(key, value);
+        match self.client.kv().put(request).await {
+            Err(e) => Err(types::Error::EtcdError(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
-    pub async fn get_prefix(&self, prefix: &str) -> Vec<String> {
-        let mut resp = self
-            .client
-            .kv()
-            .range(RangeRequest::new(KeyRange::prefix(prefix)))
-            .await
-            .unwrap();
+    pub async fn get_prefix(&self, prefix: &str) -> types::Result<Vec<String>> {
+        let request = RangeRequest::new(KeyRange::prefix(prefix));
+        let result = self.client.kv().range(request).await;
+        let to_string = |kv: KeyValue| String::from_utf8(kv.value().to_vec()).unwrap();
 
-        resp.take_kvs()
-            .into_iter()
-            .map(|kv| String::from_utf8(kv.value().to_vec()).unwrap())
-            .collect()
+        match result {
+            Ok(mut response) => Ok(response.take_kvs().into_iter().map(to_string).collect()),
+            Err(e) => Err(types::Error::EtcdError(e)),
+        }
     }
 }
 
@@ -45,12 +43,13 @@ mod tests {
 
     #[tokio::test]
     async fn fetch_active_servers() {
-        let store = Store::new(vec!["http://localhost:2379".to_owned()]).await;
-        store.put("testkey.1", "localhost:7777").await;
-        store.put("testkey.2", "localhost:8888").await;
+        let etcd = vec!["http://localhost:2379".to_owned()];
+        let store = Store::new(etcd).await.unwrap();
+        store.put("testkey.1", "localhost:7777").await.unwrap();
+        store.put("testkey.2", "localhost:8888").await.unwrap();
 
-        let servers = store.get_prefix("testkey.").await;
+        let values = store.get_prefix("testkey.").await.unwrap();
 
-        assert_eq!(servers, vec!["localhost:7777", "localhost:8888"]);
+        assert_eq!(values, vec!["localhost:7777", "localhost:8888"]);
     }
 }
