@@ -12,7 +12,7 @@ pub async fn start_server() -> Sender<()> {
     let (tx, rx) = oneshot::channel::<()>();
     let port = get_available_port().unwrap();
     tokio::spawn(async move {
-        let addr = format!("[::1]:{}", port).parse().unwrap();
+        let addr = format!("127.0.0.1:{}", port).parse().unwrap();
         let location = PathBuf::from("./target/default_ledgers");
         Server::builder()
             .add_service(LedgerApiServer::new(service::new(location, 1000)))
@@ -22,7 +22,7 @@ pub async fn start_server() -> Sender<()> {
     });
     tokio::time::delay_for(Duration::from_millis(100)).await;
     let key = "ledgers.test_server";
-    let endpoint = format!("http://localhost:{}", port);
+    let endpoint = format!("http://127.0.0.1:{}", port);
     register(etcd, key, &endpoint).await;
     tx
 }

@@ -10,7 +10,7 @@ license = "MIT"
 tokio = { version = "0.2", features = ["full"] }
 futures = "0.3.5"
 prost = "0.6"
-tonic = "0.2.1"
+tonic = "0.3.1"
 
 [build-dependencies]
 tonic-build = "0.2"
