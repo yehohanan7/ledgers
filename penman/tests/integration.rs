@@ -7,11 +7,11 @@ async fn create_new_ledger() {
     let store = penman::store::Store::new(etcd.clone()).await.unwrap();
     let mut penman = penman::new(etcd).await.unwrap();
 
-    let id = penman.create_ledger().await.unwrap();
+    let ledger = penman.create_ledger().await.unwrap();
 
-    assert_eq!(id.len(), 36);
+    assert_eq!(ledger.id.len(), 36);
     assert!(store
-        .get(&format!("/ledgers/{}/partitions/0/segments/0", id))
+        .get(&format!("/ledgers/{}/partitions/0/segments/0", ledger.id))
         .await
         .unwrap()
         .unwrap()

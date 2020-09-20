@@ -7,35 +7,45 @@ use types::*;
 
 pub struct Penman {
     store: Store,
-    clients: Vec<Client>,
+    nodes: Vec<Node>,
 }
 
-struct Client {
+struct Node {
     endpoint: String,
-    api: LedgerApiClient<Channel>,
+    client: LedgerApiClient<Channel>,
+}
+
+pub struct Ledger {
+    pub id: String,
+}
+
+impl Ledger {
+    pub async fn new(id: String, node: &str, store: &Store) -> Result<Ledger> {
+        let segment_key = format!("/ledgers/{}/partitions/0/segments/0", id);
+        store.put(&segment_key, &node).await?;
+        Ok(Ledger { id })
+    }
 }
 
 impl Penman {
     pub async fn new(etcd: Vec<String>) -> Result<Penman> {
-        let mut clients = vec![];
+        let mut nodes = vec![];
         let store = Store::new(etcd).await?;
         for endpoint in store.get_prefix("/ledgers/nodes/").await? {
-            clients.push(Client {
+            nodes.push(Node {
                 endpoint: endpoint.clone(),
-                api: LedgerApiClient::connect(endpoint).await?,
+                client: LedgerApiClient::connect(endpoint).await?,
             });
         }
-        Ok(Penman { store, clients })
+        Ok(Penman { store, nodes })
     }
 
-    pub async fn create_ledger(&mut self) -> Result<String> {
-        let client = self.clients.get_mut(0).unwrap();
+    pub async fn create_ledger(&mut self) -> Result<Ledger> {
+        let node = self.nodes.get_mut(0).unwrap();
         let request = tonic::Request::new(CreateLedgerRequest {});
-        let response = client.api.create(request).await?;
+        let response = node.client.create(request).await?;
         let ledger_id = response.into_inner().ledger_id;
-        let initial_segment = format!("/ledgers/{}/partitions/0/segments/0", ledger_id);
-        self.store.put(&initial_segment, &client.endpoint).await?;
-        Ok(ledger_id)
+        Ledger::new(ledger_id, &node.endpoint, &self.store).await
     }
 }
 
