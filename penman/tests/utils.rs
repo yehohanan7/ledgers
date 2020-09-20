@@ -21,7 +21,7 @@ pub async fn start_server() -> Sender<()> {
             .unwrap();
     });
     tokio::time::delay_for(Duration::from_millis(100)).await;
-    let key = "ledgers.test_server";
+    let key = "/ledgers/nodes/test_server";
     let endpoint = format!("http://127.0.0.1:{}", port);
     register(etcd, key, &endpoint).await;
     tx

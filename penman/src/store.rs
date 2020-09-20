@@ -35,6 +35,17 @@ impl Store {
             Err(e) => Err(types::Error::EtcdError(e)),
         }
     }
+
+    pub async fn get(&self, key: &str) -> types::Result<Option<String>> {
+        let mut values = self.get_prefix(key).await?;
+        if values.len() == 0 {
+            Err(types::Error::KeyNotFound)
+        } else if values.len() > 1 {
+            Err(types::Error::KeyNotUnique)
+        } else {
+            Ok(values.pop())
+        }
+    }
 }
 
 #[cfg(test)]

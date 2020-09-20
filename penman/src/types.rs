@@ -5,6 +5,8 @@ pub enum Error {
     TranportError(tonic::transport::Error),
     RpcError(tonic::Code),
     EtcdError(Box<dyn std::error::Error + Send + Sync + 'static>),
+    KeyNotUnique,
+    KeyNotFound,
 }
 
 impl std::convert::From<tonic::transport::Error> for Error {

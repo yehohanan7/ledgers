@@ -28,7 +28,7 @@ impl LedgerApi for LedgerService {
         let repo = &self.repository;
         let response = match repo.create(&self.path, self.segment_size).await {
             Ok(id) => api::LedgerCreatedResponse { ledger_id: id },
-            Err(_) => panic!("error creating ledger"),
+            Err(_) => panic!("error creating ledger"), //TODO: handle error gracefully
         };
         Ok(Response::new(response))
     }

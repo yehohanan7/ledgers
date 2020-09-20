@@ -26,6 +26,6 @@ case $cmd in
      docker stop etcd && docker rm etcd
      ;;
   * )
-     docker exec etcd etcdctl put ledgers.local 127.0.0.1:7878
+     docker exec etcd etcdctl put /ledgers/nodes/local 127.0.0.1:7878
      cargo run -- --port 7878 
 esac

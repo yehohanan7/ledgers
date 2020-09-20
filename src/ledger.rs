@@ -20,9 +20,10 @@ impl LedgerRepository {
 
     pub async fn create(&self, location: &Path, segment_size: u64) -> Result<String> {
         let ledgers = self.ledgers.clone();
+        let mut ledgers = ledgers.write().await;
         let ledger = Ledger::new(location, segment_size).await?;
         let id = ledger.id.clone();
-        ledgers.write().await.insert(id.clone(), ledger);
+        ledgers.insert(id.clone(), ledger);
         Ok(id)
     }
 }
